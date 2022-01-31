@@ -35,9 +35,9 @@ type TokenReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=token.kubetrail.io,resources=tokens,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=token.kubetrail.io,resources=tokens/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=token.kubetrail.io,resources=tokens/finalizers,verbs=update
+//+kubebuilder:rbac:groups=serviceaccount.kubetrail.io,resources=tokens,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=serviceaccount.kubetrail.io,resources=tokens/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=serviceaccount.kubetrail.io,resources=tokens/finalizers,verbs=update
 //+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to

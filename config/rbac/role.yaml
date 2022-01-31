@@ -19,7 +19,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - token.kubetrail.io
+  - serviceaccount.kubetrail.io
   resources:
   - tokens
   verbs:
@@ -31,13 +31,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - token.kubetrail.io
+  - serviceaccount.kubetrail.io
   resources:
   - tokens/finalizers
   verbs:
   - update
 - apiGroups:
-  - token.kubetrail.io
+  - serviceaccount.kubetrail.io
   resources:
   - tokens/status
   verbs:

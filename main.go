@@ -24,7 +24,7 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	tokenv1beta1 "github.com/kubetrail/serviceaccount-operator/api/v1beta1"
+	serviceaccountv1beta1 "github.com/kubetrail/serviceaccount-operator/api/v1beta1"
 	"github.com/kubetrail/serviceaccount-operator/controllers"
 	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -44,7 +44,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(tokenv1beta1.AddToScheme(scheme))
+	utilruntime.Must(serviceaccountv1beta1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -86,7 +86,7 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "Token")
 		os.Exit(1)
 	}
-	if err = (&tokenv1beta1.Token{}).SetupWebhookWithManager(mgr); err != nil {
+	if err = (&serviceaccountv1beta1.Token{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "Token")
 		os.Exit(1)
 	}

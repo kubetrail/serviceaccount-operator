@@ -5,7 +5,7 @@ metadata:
   name: token-viewer-role
 rules:
 - apiGroups:
-  - token.kubetrail.io
+  - serviceaccount.kubetrail.io
   resources:
   - tokens
   verbs:
@@ -13,7 +13,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - token.kubetrail.io
+  - serviceaccount.kubetrail.io
   resources:
   - tokens/status
   verbs:

@@ -12,12 +12,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-token-kubetrail-io-v1beta1-token
+      path: /mutate-serviceaccount-kubetrail-io-v1beta1-token
   failurePolicy: Fail
   name: mtoken.kb.io
   rules:
   - apiGroups:
-    - token.kubetrail.io
+    - serviceaccount.kubetrail.io
     apiVersions:
     - v1beta1
     operations:
@@ -40,12 +40,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-token-kubetrail-io-v1beta1-token
+      path: /validate-serviceaccount-kubetrail-io-v1beta1-token
   failurePolicy: Fail
   name: vtoken.kb.io
   rules:
   - apiGroups:
-    - token.kubetrail.io
+    - serviceaccount.kubetrail.io
     apiVersions:
     - v1beta1
     operations:

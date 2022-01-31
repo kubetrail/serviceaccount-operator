@@ -12,7 +12,7 @@ resources:
     namespaced: true
   controller: true
   domain: kubetrail.io
-  group: token
+  group: serviceaccount
   kind: Token
   path: github.com/kubetrail/serviceaccount-operator/api/v1beta1
   version: v1beta1

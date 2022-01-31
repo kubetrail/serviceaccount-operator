@@ -37,7 +37,7 @@ func (r *Token) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
-//+kubebuilder:webhook:path=/mutate-token-kubetrail-io-v1beta1-token,mutating=true,failurePolicy=fail,sideEffects=None,groups=token.kubetrail.io,resources=tokens,verbs=create;update,versions=v1beta1,name=mtoken.kb.io,admissionReviewVersions=v1
+//+kubebuilder:webhook:path=/mutate-serviceaccount-kubetrail-io-v1beta1-token,mutating=true,failurePolicy=fail,sideEffects=None,groups=serviceaccount.kubetrail.io,resources=tokens,verbs=create;update,versions=v1beta1,name=mtoken.kb.io,admissionReviewVersions=v1
 
 var _ webhook.Defaulter = &Token{}
 
@@ -58,7 +58,7 @@ func (r *Token) Default() {
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-//+kubebuilder:webhook:path=/validate-token-kubetrail-io-v1beta1-token,mutating=false,failurePolicy=fail,sideEffects=None,groups=token.kubetrail.io,resources=tokens,verbs=create;update,versions=v1beta1,name=vtoken.kb.io,admissionReviewVersions=v1
+//+kubebuilder:webhook:path=/validate-serviceaccount-kubetrail-io-v1beta1-token,mutating=false,failurePolicy=fail,sideEffects=None,groups=serviceaccount.kubetrail.io,resources=tokens,verbs=create;update,versions=v1beta1,name=vtoken.kb.io,admissionReviewVersions=v1
 
 var _ webhook.Validator = &Token{}
 
