@@ -25,21 +25,23 @@ import (
 
 // TokenSpec defines the desired state of Token
 type TokenSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of Token. Edit token_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	ServiceAccountName string `json:"serviceAccountName,omitempty"`
+	RotationSeconds    int64  `json:"rotationSeconds,omitempty"`
+	SecretName         string `json:"secretName,omitempty"`
 }
 
 // TokenStatus defines the observed state of Token
 type TokenStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Phase      string             `json:"phase,omitempty"`
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
+	Message    string             `json:"message,omitempty"`
+	Reason     string             `json:"reason,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.phase",description="Status of token"
+//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 
 // Token is the Schema for the tokens API
 type Token struct {

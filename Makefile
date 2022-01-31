@@ -199,3 +199,115 @@ catalog-build: opm ## Build a catalog image.
 .PHONY: catalog-push
 catalog-push: ## Push a catalog image.
 	$(MAKE) docker-push IMG=$(CATALOG_IMG)
+
+# ===============================================================================================
+# Code below has been added for custom builds using podman
+# formatting color values
+RD="$(shell tput setaf 1)"
+YE="$(shell tput setaf 3)"
+NC="$(shell tput sgr0)"
+
+# Image URL to use all building/pushing image targets to
+# Google artifact registry
+NAME=serviceaccount-operator
+CATEGORY=services
+TAG=0.0.1-dev-0
+REPO=us-central1-docker.pkg.dev/${PROJECT}
+IMG_TMP=${REPO}/tmp/${CATEGORY}/${NAME}:${TAG}
+IMG_BASE=${REPO}/artifacts/${CATEGORY}/${NAME}
+
+# sanity check
+.PHONY: _sanity
+_sanity:
+	@if [[ -z "${PROJECT}" ]]; then \
+		echo "please set PROJECT env. var for your Google cloud project"; \
+		exit 1; \
+	fi
+	@for cmd in podman kubectl helm go goimports; do \
+		if [[ -z $$(command -v $${cmd}) ]]; then \
+			echo "$${cmd} not found. pl. install."; \
+			exit 1; \
+		fi; \
+	done
+
+.PHONY: goimports ## Run goimports against code
+goimports:
+	goimports -w -l ./main.go
+	goimports -w -l ./api
+	goimports -w -l ./controllers
+
+.PHONY: vendor ## Run go vendor against code
+vendor:
+	@echo need golang version 1.17.x or higher
+	go version
+	rm -rf vendor
+	go mod vendor
+
+# podman-build-push builds amd64 and arm64 containers and links them
+# to a manifest file that is compatible with both arch
+# This will only work with podman on Linux OS!
+.PHONY: podman-build-push
+podman-build-push: _sanity goimports vendor
+	@echo -e ${YE}▶ building and pushing tmp container${NC}
+	@podman build -t ${IMG_TMP} -f ./Dockerfile-podman
+	@podman push ${IMG_TMP}
+	@echo -e ${YE}▶ building and pushing amd64 container${NC}
+	@cat Dockerfile-podman.tmpl | \
+		PROJECT=${PROJECT} \
+		CATEGORY=${CATEGORY} \
+		NAME=${NAME} \
+		TAG=${TAG} \
+		ARCH=amd64 \
+		envsubst | \
+		podman build --arch=amd64 -t ${IMG_BASE}:${TAG}.amd64 -f -
+	@podman push ${IMG_BASE}:${TAG}.amd64
+	@echo -e ${YE}▶ building and pushing arm64 container${NC}
+	@cat Dockerfile-podman.tmpl | \
+		PROJECT=${PROJECT} \
+		CATEGORY=${CATEGORY} \
+		NAME=${NAME} \
+		TAG=${TAG} \
+		ARCH=arm64 \
+		envsubst | \
+		podman build --arch=arm64 -t ${IMG_BASE}:${TAG}.arm64 -f -
+	@podman push ${IMG_BASE}:${TAG}.arm64
+	@echo -e ${YE}▶ creating or modifying manifest${NC}
+	@podman manifest create ${IMG_BASE}:${TAG} || \
+		for digest in $$(podman manifest inspect ${IMG_BASE}:${TAG} | jq -r '.manifests[].digest'); do \
+			podman manifest remove ${IMG_BASE}:${TAG} $${digest}; \
+		done
+	@echo -e ${YE}▶ adding amd64 container to manifest${NC}
+	@podman manifest add ${IMG_BASE}:${TAG} ${IMG_BASE}:${TAG}.amd64
+	@echo -e ${YE}▶ adding arm64 container to manifest${NC}
+	@podman manifest add ${IMG_BASE}:${TAG} ${IMG_BASE}:${TAG}.arm64
+	@echo -e ${YE}▶ pushing manifest${NC}
+	@podman push ${IMG_BASE}:${TAG}
+	@podman manifest inspect ${IMG_BASE}:${TAG} | jq '.'
+	@echo -e ${YE}▶ container images${NC}
+	@podman images | grep ${IMG_BASE}
+
+# deploy-manifests creates manifests with custom updates of image name
+.PHONY: deploy-manifests
+deploy-manifests: manifests kustomize ## Deploy-manifests generates k8s manifests without deploying
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	$(KUSTOMIZE) build config/default --output config/extra/manifests.yaml
+	sed -i -e "s/image: controller:latest/image: $$(echo -n ${IMG_BASE}:${TAG} | sed -e 's/\//\\\//g')/g" config/extra/manifests.yaml
+	$(KUSTOMIZE) build config/extra > config/samples/manifests.yaml
+	@echo "==============="
+	@echo kubectl apply -f config/samples/manifests.yaml
+
+# logs monitors logs from the controller
+.PHONY: logs
+logs:
+	@kubectl --namespace=${NAME}-system logs -f deployments.apps/${NAME}-controller-manager -c manager
+
+# reboot scales down and then up the controller deployment
+.PHONY: reboot
+reboot:
+	@kubectl --namespace=${NAME}-system scale deployment --replicas=0 ${NAME}-controller-manager
+	@kubectl --namespace=${NAME}-system scale deployment --replicas=1 ${NAME}-controller-manager
+
+# watch watches a few resources
+.PHONY: watch
+watch:
+	@watch kubectl --namespace=${NAME}-system get pods,svc,configmaps,secrets,servicemonitors
