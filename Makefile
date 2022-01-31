@@ -247,7 +247,13 @@ vendor:
 # to a manifest file that is compatible with both arch
 # This will only work with podman on Linux OS!
 .PHONY: podman-build-push
-podman-build-push: _sanity goimports vendor
+podman-build-push: _podman-build-push generate
+	@podman manifest inspect ${IMG_BASE}:${TAG} | jq '.'
+	@echo -e ${YE}▶ container images${NC}
+	@podman images | grep ${IMG_BASE}
+
+.PHONY: _podman-build-push
+_podman-build-push: _sanity goimports vendor
 	@echo -e ${YE}▶ building and pushing tmp container${NC}
 	@podman build -t ${IMG_TMP} -f ./Dockerfile-podman
 	@podman push ${IMG_TMP}
@@ -282,9 +288,6 @@ podman-build-push: _sanity goimports vendor
 	@podman manifest add ${IMG_BASE}:${TAG} ${IMG_BASE}:${TAG}.arm64
 	@echo -e ${YE}▶ pushing manifest${NC}
 	@podman push ${IMG_BASE}:${TAG}
-	@podman manifest inspect ${IMG_BASE}:${TAG} | jq '.'
-	@echo -e ${YE}▶ container images${NC}
-	@podman images | grep ${IMG_BASE}
 
 # deploy-manifests creates manifests with custom updates of image name
 .PHONY: deploy-manifests
