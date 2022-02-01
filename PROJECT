@@ -1,0 +1,23 @@
+domain: kubetrail.io
+layout:
+- go.kubebuilder.io/v3
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
+projectName: serviceaccount-operator
+repo: github.com/kubetrail/serviceaccount-operator
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: kubetrail.io
+  group: serviceaccount
+  kind: Token
+  path: github.com/kubetrail/serviceaccount-operator/api/v1beta1
+  version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
+version: "3"
