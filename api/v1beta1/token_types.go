@@ -25,9 +25,9 @@ import (
 
 // TokenSpec defines the desired state of Token
 type TokenSpec struct {
-	ServiceAccountName string `json:"serviceAccountName,omitempty"`
-	RotationSeconds    int64  `json:"rotationSeconds,omitempty"`
-	SecretName         string `json:"secretName,omitempty"`
+	ServiceAccountName         string `json:"serviceAccountName,omitempty"`
+	RotationPeriodSeconds      *int64 `json:"rotationPeriodSeconds,omitempty"`
+	DeletionGracePeriodSeconds *int64 `json:"deletionGracePeriodSeconds,omitempty"`
 }
 
 // TokenStatus defines the observed state of Token
@@ -36,6 +36,7 @@ type TokenStatus struct {
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 	Message    string             `json:"message,omitempty"`
 	Reason     string             `json:"reason,omitempty"`
+	SecretName string             `json:"secretName,omitempty"`
 }
 
 //+kubebuilder:object:root=true

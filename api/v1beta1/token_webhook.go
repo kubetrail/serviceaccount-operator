@@ -19,7 +19,6 @@ package v1beta1
 import (
 	"fmt"
 
-	"github.com/google/uuid"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -49,12 +48,6 @@ func (r *Token) Default() {
 		r.Spec.ServiceAccountName = "default"
 		tokenlog.Info("set service account name to", "name", r.Spec.ServiceAccountName)
 	}
-
-	if len(r.Spec.SecretName) == 0 {
-		id := uuid.New().String()
-		r.Spec.SecretName = fmt.Sprintf("%s-%s-%s", r.Spec.ServiceAccountName, "token", id[:5])
-		tokenlog.Info("set secret name to", "name", r.Spec.SecretName)
-	}
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
@@ -66,14 +59,18 @@ var _ webhook.Validator = &Token{}
 func (r *Token) ValidateCreate() error {
 	tokenlog.Info("validate create", "name", r.Name)
 
-	if r.Spec.RotationSeconds < 0 {
-		err := fmt.Errorf("rotation seconds need to be greater than or equal to zero")
-		tokenlog.Error(
-			err,
-			"validation error for rotation seconds",
-		)
+	if r.Spec.RotationPeriodSeconds != nil && *r.Spec.RotationPeriodSeconds < 600 {
+		err := fmt.Errorf("rotation period seconds needs to be at least 600 seconds")
+		tokenlog.Error(err, "invalid rotation period")
 		return err
 	}
+
+	if r.Spec.DeletionGracePeriodSeconds != nil && *r.Spec.DeletionGracePeriodSeconds < 600 {
+		err := fmt.Errorf("token deletion grace period needs to be at least 600 seconds")
+		tokenlog.Error(err, "invalid token deletion grace period")
+		return err
+	}
+
 	return nil
 }
 
@@ -81,14 +78,18 @@ func (r *Token) ValidateCreate() error {
 func (r *Token) ValidateUpdate(old runtime.Object) error {
 	tokenlog.Info("validate update", "name", r.Name)
 
-	if r.Spec.RotationSeconds < 0 {
-		err := fmt.Errorf("rotation seconds need to be greater than or equal to zero")
-		tokenlog.Error(
-			err,
-			"validation error for rotation seconds",
-		)
+	if r.Spec.RotationPeriodSeconds != nil && *r.Spec.RotationPeriodSeconds < 600 {
+		err := fmt.Errorf("rotation period seconds needs to be at least 600 seconds")
+		tokenlog.Error(err, "invalid rotation period")
 		return err
 	}
+
+	if r.Spec.DeletionGracePeriodSeconds != nil && *r.Spec.DeletionGracePeriodSeconds < 600 {
+		err := fmt.Errorf("token deletion grace period needs to be at least 600 seconds")
+		tokenlog.Error(err, "invalid token deletion grace period")
+		return err
+	}
+
 	return nil
 }
 

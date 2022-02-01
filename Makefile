@@ -211,7 +211,7 @@ NC="$(shell tput sgr0)"
 # Google artifact registry
 NAME=serviceaccount-operator
 CATEGORY=services
-TAG=0.0.1-dev-1
+TAG=0.0.1-dev-14
 REPO=us-central1-docker.pkg.dev/${PROJECT}
 IMG_TMP=${REPO}/tmp/${CATEGORY}/${NAME}:${TAG}
 IMG_BASE=${REPO}/artifacts/${CATEGORY}/${NAME}
