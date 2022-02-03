@@ -292,7 +292,7 @@ _podman-build-push: _sanity goimports vendor
 # deploy-manifests creates manifests with custom updates of image name
 .PHONY: deploy-manifests
 deploy-manifests: manifests kustomize ## Deploy-manifests generates k8s manifests without deploying
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	cd config/manager && $(KUSTOMIZE) edit set image controller=controller:latest
 	$(KUSTOMIZE) build config/default --output config/extra/manifests.yaml
 	sed -i -e "s/image: controller:latest/image: $$(echo -n ${IMG_BASE}:${TAG} | sed -e 's/\//\\\//g')/g" config/extra/manifests.yaml
 	$(KUSTOMIZE) build config/extra > config/samples/manifests.yaml
